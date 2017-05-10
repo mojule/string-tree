@@ -1,6 +1,6 @@
 {
   "name": "@mojule/string-tree",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Work with trees of strings",
   "main": "index.js",
   "scripts": {

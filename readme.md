@@ -76,7 +76,7 @@ with child nodes nested as appropriate
 - tabs are converted to two spaces
 - EOL within strings is expected to be escaped, eg `\n` rather than a literal
   EOL
-- empty lines are ignored
+- empty lines are ignored unless the option `retainEmpty` is passed, see below
 
 ```javascript
 const data = `
@@ -98,4 +98,54 @@ const child = root.firstChild()
 console.log( child.getValue() )
 
 // etc.
+```
+
+#### options
+
+You can pass an optional `options` parameter. By default it is:
+
+```json
+{
+  "retainEmpty": false
+}
+```
+
+Even with `retainEmpty` set to true, any leading empty lines are removed, as
+they cannot have a parent to be added to.
+
+Empty lines between non-empty lines are added at the same level as the next
+non-empty line.
+
+Empty lines at the end of the data are added at the same level as the previous
+non-empty line.
+
+Calling `getValue()` on an empty node will return an empty string.
+
+```javascript
+const data = `
+Root
+
+  Child 1
+
+    Grandchild 1
+  Child 2
+    Grandchild 2
+
+`
+
+const root = Tree.deserialize( data, { retainEmpty: true } )
+
+console.log( root.serialize().replace( / /g, '.' ) )
+```
+
+```
+Root
+..
+..Child.1
+....
+....Grandchild.1
+..Child.2
+....Grandchild.2
+....
+....
 ```

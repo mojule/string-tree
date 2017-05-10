@@ -34,6 +34,22 @@ const expectSerialized =
               Housefly
 `
 
+const withEmpty = `
+
+Root
+
+  Child 1
+
+  Child 2
+    GrandChild 1
+
+    GrandChild 2
+
+
+`
+
+const expectEmpty = 'Root\n  \n  Child 1\n  \n  Child 2\n    GrandChild 1\n    \n    GrandChild 2\n    \n    \n    \n'
+
 describe( 'string-tree', () => {
   describe( 'Base', () => {
     it( 'Raw nodes', () => {
@@ -92,6 +108,13 @@ describe( 'string-tree', () => {
         const deserialized = Tree.deserialize( serialized )
 
         assert.equal( serialized, deserialized.serialize() )
+      })
+
+      it( 'deserializes with empty', () => {
+        const deserialized = Tree.deserialize( withEmpty, { retainEmpty: true } )
+        const serialized = deserialized.serialize()
+
+        assert.equal( expectEmpty, serialized )
       })
 
       it( 'escapes', () => {

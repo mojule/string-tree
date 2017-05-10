@@ -7,6 +7,10 @@ const unescape = str => str.replace( /\\n/g, '\n' )
 const trimStart = str => str.replace( /^\s+/g, '' )
 
 const serializer = node => {
+  const defaultOptions = {
+    retainEmpty: false
+  }
+
   return {
     serialize: () => {
       let serialized = ''
@@ -19,19 +23,28 @@ const serializer = node => {
 
       return serialized
     },
-    $deserialize: str => {
-      const lines = (
+    $deserialize: ( str, options ) => {
+      options = Object.assign( {}, defaultOptions, options )
+
+      const { retainEmpty } = options
+
+      let lines = (
         normalizeEol( str )
         .split( /\n/ )
         .map( unescape )
         .map( normalizeIndent )
-        .filter( s => s.trim() !== '' )
       )
 
-      const parsedNodes = lines.reduce( ( nodes, line, i ) => {
+      if( retainEmpty ){
+        fixEmpty( lines )
+      } else {
+        lines = lines.filter( s => s.trim() !== '' )
+      }
+
+      const parsedNodes = lines.reduce( ( nodes, line ) => {
         const value = trimStart( line )
         const indent = line.length - value.length
-        const prev = nodes[ i - 1 ]
+        const prev = nodes[ nodes.length - 1 ]
         const current = node( node.createState( value ) )
 
         current.meta( { indent, prev } )
@@ -59,6 +72,43 @@ const serializer = node => {
       return root
     }
   }
+}
+
+const fixEmpty = lines => {
+  while( lines[ 0 ].trim() === '' )
+    lines.shift()
+
+  lines.forEach( ( line, i ) => {
+    if( line.trim() === '' ){
+      let indent = 0
+
+      for( let j = i; j < lines.length; j++ ){
+        const next = lines[ j ]
+        const value = trimStart( next )
+
+        indent = next.length - value.length
+
+        if( indent > 0 ){
+          lines[ i ] = ' '.repeat( indent )
+          break;
+        }
+      }
+
+      if( indent === 0 ){
+        for( let j = i; j > 0; j-- ){
+          const prev = lines[ j ]
+          const value = trimStart( prev )
+
+          indent = prev.length - value.length
+
+          if( indent > 0 ){
+            lines[ i ] = ' '.repeat( indent )
+            break;
+          }
+        }
+      }
+    }
+  })
 }
 
 module.exports = serializer
