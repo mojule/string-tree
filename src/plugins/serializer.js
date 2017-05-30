@@ -54,6 +54,9 @@ const serializer = node => {
         return nodes
       }, [] )
 
+      if( parsedNodes.length === 0 )
+        throw new Error( 'Cannot deserialize empty file' )
+
       const root = parsedNodes.shift()
 
       parsedNodes.forEach( current => {
@@ -75,7 +78,7 @@ const serializer = node => {
 }
 
 const fixEmpty = lines => {
-  while( lines[ 0 ].trim() === '' )
+  while( lines.length > 0 && lines[ 0 ].trim() === '' )
     lines.shift()
 
   lines.forEach( ( line, i ) => {

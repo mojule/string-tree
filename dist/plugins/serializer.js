@@ -63,6 +63,8 @@ var serializer = function serializer(node) {
         return nodes;
       }, []);
 
+      if (parsedNodes.length === 0) throw new Error('Cannot deserialize empty file');
+
       var root = parsedNodes.shift();
 
       parsedNodes.forEach(function (current) {
@@ -82,7 +84,7 @@ var serializer = function serializer(node) {
 };
 
 var fixEmpty = function fixEmpty(lines) {
-  while (lines[0].trim() === '') {
+  while (lines.length > 0 && lines[0].trim() === '') {
     lines.shift();
   }lines.forEach(function (line, i) {
     if (line.trim() === '') {

@@ -149,6 +149,10 @@ describe( 'string-tree', () => {
         assert.throws( () => Tree.deserialize( bad1 ) )
         assert.throws( () => Tree.deserialize( bad2 ) )
       })
+
+      it( 'empty file', () => {
+        assert.throws( () => Tree.deserialize( '', { retainEmpty: true } ) )
+      })
     })
   })
 
