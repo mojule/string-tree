@@ -69,14 +69,18 @@ Animalia
 
 ### deserialize
 
-Takes a tree as a string in the format outlined above and returns a root node
-with child nodes nested as appropriate
+The default behaviour is to take a tree as a string in the format outlined above and
+returns a root node with child nodes nested as appropriate.
 
-- will throw if there is more than one root or nesting doesn't make sense
-- tabs are converted to two spaces
+- root must have no indent.
+- will throw if there is more than one root or nesting doesn't make sense.
+- tabs are converted to two spaces.
 - EOL within strings is expected to be escaped, eg `\n` rather than a literal
-  EOL
-- empty lines are ignored unless the option `retainEmpty` is passed, see below
+  EOL.
+- empty lines are ignored unless the option `retainEmpty` is passed, see below.
+
+If the `deserializeMultiple : true` option is set there may be multiple roots in the passed string.
+Returns an array of root nodes with child nodes nested as appropriate.
 
 ```javascript
 const data = `

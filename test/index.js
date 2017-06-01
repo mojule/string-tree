@@ -106,7 +106,6 @@ describe( 'string-tree', () => {
         const tree = Tree( biology )
         const serialized = tree.serialize()
         const deserialized = Tree.deserialize( serialized )
-
         assert.equal( serialized, deserialized.serialize() )
       })
 
@@ -143,11 +142,15 @@ describe( 'string-tree', () => {
       })
 
       it( 'bad nesting', () => {
-        const bad1 = '  Chordate\nAnimalia'
-        const bad2 = 'Chordate\nAnimalia'
+        const bad = '  Chordate\nAnimalia'
+        assert.throws( () => Tree.deserialize( bad ) )
+      } )
 
-        assert.throws( () => Tree.deserialize( bad1 ) )
-        assert.throws( () => Tree.deserialize( bad2 ) )
+      it( 'multiple roots', () => {
+        const mult = 'Fungi\n\tOomycota\nAnimalia\n\tChordate'
+        assert.throws(() => Tree.deserialize( mult ) )
+        const roots = Tree.deserialize(mult, {deserializeMultiple : true})
+        assert.equal( roots.length, 2 )
       })
 
       it( 'empty file', () => {

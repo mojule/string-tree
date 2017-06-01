@@ -1,3 +1,5 @@
+'use strict'
+
 const is = require( '@mojule/is' )
 
 const $createRawNode = value => [ value ]
