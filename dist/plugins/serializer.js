@@ -18,7 +18,8 @@ var trimStart = function trimStart(str) {
 
 var serializer = function serializer(node) {
   var defaultOptions = {
-    retainEmpty: false
+    retainEmpty: false,
+    deserializeMultiple: false
   };
 
   return {
@@ -37,7 +38,8 @@ var serializer = function serializer(node) {
       options = Object.assign({}, defaultOptions, options);
 
       var _options = options,
-          retainEmpty = _options.retainEmpty;
+          retainEmpty = _options.retainEmpty,
+          deserializeMultiple = _options.deserializeMultiple;
 
 
       var lines = normalizeEol(str).split(/\n/).map(unescape).map(normalizeIndent);
@@ -65,22 +67,59 @@ var serializer = function serializer(node) {
 
       if (parsedNodes.length === 0) throw new Error('Cannot deserialize empty file');
 
-      var root = parsedNodes.shift();
+      if (parsedNodes[0].getMeta('indent') !== 0) throw new Error('Bad nesting');
 
-      parsedNodes.forEach(function (current) {
-        var indent = current.getMeta('indent');
-        var parent = current.getMeta('prev');
+      var rootNodeIndices = parsedNodes.reduce(function (acc, node, index) {
+        if (node.getMeta('indent') === 0) {
+          acc.push(index);
+        }
+        return acc;
+      }, []);
 
-        while (parent && parent.getMeta('indent') >= indent) {
-          parent = parent.getMeta('prev');
-        }if (!parent) throw new Error('Bad nesting');
+      var parsedNodeTrees = [];
+      for (var i = 0; i < rootNodeIndices.length; i++) {
+        var start = rootNodeIndices[i];
+        var end = undefined;
+        if (i + 1 < rootNodeIndices.length) {
+          end = rootNodeIndices[i + 1] - 1;
+        }
+        var newTree = parsedNodes.slice(start, end);
+        parsedNodeTrees.push(newTree);
+      }
 
-        parent.append(current);
-      });
-
-      return root;
+      if (deserializeMultiple) {
+        var result = parsedNodeTrees.map(function (current) {
+          return parsedNodesToTree(current);
+        });
+        return result;
+      } else {
+        if (parsedNodeTrees.length === 1) {
+          var _result = parsedNodesToTree(parsedNodeTrees[0]);
+          return _result;
+        }
+        throw new Error('Multiple roots and deserializeMultiple=false');
+      }
     }
   };
+};
+
+var parsedNodesToTree = function parsedNodesToTree(parsedNodes) {
+  var root = parsedNodes.shift();
+
+  parsedNodes.forEach(function (current) {
+    var indent = current.getMeta('indent');
+    var parent = current.getMeta('prev');
+
+    while (parent && parent.getMeta('indent') >= indent) {
+      parent = parent.getMeta('prev');
+    }
+
+    if (!parent) throw new Error('Bad nesting');
+
+    parent.append(current);
+  });
+
+  return root;
 };
 
 var fixEmpty = function fixEmpty(lines) {
