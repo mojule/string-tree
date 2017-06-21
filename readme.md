@@ -14,16 +14,16 @@ const Tree = require( '@mojule/string-tree' )
 const root = Tree( 'Root' )
 const child = Tree( 'Child' )
 
-root.add( 'child' )
+root.appendChild( 'child' )
 ```
 
 ## API
 
 Has all the API functions from
-[mojule tree-factory](https://github.com/mojule/tree-factory), and the following
+[tree](https://github.com/mojule/tree), and the following
 plugins:
 
-### serialize
+### toString
 
 Creates a string representation of the tree. EOL characters within string nodes
 are normalized to \n and escaped.
@@ -33,9 +33,9 @@ are normalized to \n and escaped.
 ```javascript
 const data = require( './test/fixtures/biology.json' )
 
-const tree = Tree( data )
+const tree = Tree.deserialize( data )
 
-console.log( tree.serialize() )
+console.log( tree.toString() )
 ```
 
 ```
@@ -67,7 +67,7 @@ Animalia
               Housefly
 ```
 
-### deserialize
+### parse
 
 The default behaviour is to take a tree as a string in the format outlined above and
 returns a root node with child nodes nested as appropriate.
@@ -91,15 +91,15 @@ Root
     Grandchild 2
 `
 
-const root = Tree.deserialize( data )
+const root = Tree.parse( data )
 
 // 'Root'
-console.log( root.getValue() )
+console.log( root.value )
 
-const child = root.firstChild()
+const child = root.firstChild
 
 // 'Child'
-console.log( child.getValue() )
+console.log( child.value )
 
 // etc.
 ```
@@ -123,7 +123,7 @@ non-empty line.
 Empty lines at the end of the data are added at the same level as the previous
 non-empty line.
 
-Calling `getValue()` on an empty node will return an empty string.
+The value property of an empty node will be an empty string.
 
 ```javascript
 const data = `
@@ -137,9 +137,9 @@ Root
 
 `
 
-const root = Tree.deserialize( data, { retainEmpty: true } )
+const root = Tree.parse( data, { retainEmpty: true } )
 
-console.log( root.serialize().replace( / /g, '.' ) )
+console.log( root.toString().replace( / /g, '.' ) )
 ```
 
 ```
