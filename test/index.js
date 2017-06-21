@@ -53,7 +53,7 @@ const expectEmpty = 'Root\n  \n  Child 1\n  \n  Child 2\n    GrandChild 1\n    \
 describe( 'string-tree', () => {
   describe( 'Base', () => {
     it( 'Raw nodes', () => {
-      const tree = Tree( biology )
+      const tree = Tree.deserialize( biology )
 
       assert( is.string( tree.value ) )
     })
@@ -96,14 +96,14 @@ describe( 'string-tree', () => {
   describe( 'Plugins', () => {
     describe( 'Serializer', () => {
       it( 'serializes', () => {
-        const tree = Tree( biology )
+        const tree = Tree.deserialize( biology )
         const serialized = tree.toString()
 
         assert.equal( serialized, expectSerialized )
       })
 
       it( 'deserializes', () => {
-        const tree = Tree( biology )
+        const tree = Tree.deserialize( biology )
         const serialized = tree.toString()
         const deserialized = Tree.parse( serialized )
         assert.equal( serialized, deserialized.toString() )
