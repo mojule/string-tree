@@ -7,10 +7,7 @@ const api = ({ api, state }) => {
     let serialized = ''
 
     api.dfsNodes.forEach( current => {
-      const parent = current.parentNode
-      const depth = current.depth()
-
-      serialized += '  '.repeat( depth )
+      serialized += '  '.repeat( current.depth() )
       serialized += trimStart( escape( current.value ) )
       serialized += '\n'
     })
