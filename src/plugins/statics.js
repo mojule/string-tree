@@ -96,9 +96,6 @@ const parsedNodesToTree = parsedNodes => {
       parent = parent.meta.prev
     }
 
-    if( !parent )
-      throw new Error( 'Bad nesting' )
-
     parent.appendChild( current )
   })
 

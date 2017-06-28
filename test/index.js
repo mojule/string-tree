@@ -91,6 +91,12 @@ describe( 'string-tree', () => {
       assert.equal( root.childNodes.length, 2 )
       assert.equal( root.firstChild, child1 )
     })
+
+    it( 'tree name', () => {
+      const root = Tree( 'Root' )
+
+      assert.strictEqual( root.treeName, 'string-tree' )
+    })
   })
 
   describe( 'Plugins', () => {
@@ -142,9 +148,8 @@ describe( 'string-tree', () => {
       })
 
       it( 'bad nesting', () => {
-        const bad = '  Chordate\nAnimalia'
-        assert.throws( () => Tree.parse( bad ) )
-      } )
+        assert.throws( () => Tree.parse( '  Oh noes' ) )
+      })
 
       it( 'multiple roots', () => {
         const mult = 'Fungi\n\tOomycota\nAnimalia\n\tChordate'

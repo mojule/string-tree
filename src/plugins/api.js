@@ -2,7 +2,7 @@
 
 const { trimStart, escape } = require( './utils' )
 
-const api = ({ api, state }) => {
+const api = ({ api, state, privates }) => {
   api.toString = () => {
     let serialized = ''
 
@@ -14,6 +14,12 @@ const api = ({ api, state }) => {
 
     return serialized
   }
+
+  privates.registerGet({
+    target: api,
+    name: 'treeName',
+    get: () => 'string-tree'
+  })
 }
 
 module.exports = api
