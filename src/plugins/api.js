@@ -2,7 +2,7 @@
 
 const { trimStart, escape } = require( './utils' )
 
-const api = ({ api, state, privates }) => {
+const api = ({ api, state, core }) => {
   api.toString = () => {
     let serialized = ''
 
@@ -15,7 +15,7 @@ const api = ({ api, state, privates }) => {
     return serialized
   }
 
-  privates.registerGet({
+  core.registerProperty({
     target: api,
     name: 'treeName',
     get: () => 'string-tree'
