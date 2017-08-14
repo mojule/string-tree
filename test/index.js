@@ -53,17 +53,17 @@ const expectEmpty = 'Root\n  \n  Child 1\n  \n  Child 2\n    GrandChild 1\n    \
 describe( 'string-tree', () => {
   describe( 'Base', () => {
     it( 'Raw nodes', () => {
-      const tree = Tree( biology )
+      const tree = Tree.deserialize( biology )
 
-      assert( is.function( tree.get ) )
+      assert( is.string( tree.value ) )
     })
 
     it( 'sets value', () => {
       const root = Tree( 'Root' )
 
-      root.setValue( 'New Root' )
+      root.value = 'New Root'
 
-      assert.equal( root.getValue(), 'New Root' )
+      assert.equal( root.value, 'New Root' )
     })
 
     it( 'removes', () => {
@@ -71,13 +71,13 @@ describe( 'string-tree', () => {
       const child1 = Tree( 'Child 1' )
       const child2 = Tree( 'Child 2' )
 
-      root.append( child1 )
-      root.append( child2 )
+      root.appendChild( child1 )
+      root.appendChild( child2 )
 
-      root.remove( child1 )
+      root.removeChild( child1 )
 
-      assert.equal( root.getChildren().length, 1 )
-      assert.equal( root.firstChild(), child2 )
+      assert.equal( root.childNodes.length, 1 )
+      assert.equal( root.firstChild, child2 )
     })
 
     it( 'adds before', () => {
@@ -85,33 +85,39 @@ describe( 'string-tree', () => {
       const child1 = Tree( 'Child 1' )
       const child2 = Tree( 'Child 2' )
 
-      root.add( child2 )
-      root.add( child1, child2 )
+      root.appendChild( child2 )
+      root.insertBefore( child1, child2 )
 
-      assert.equal( root.getChildren().length, 2 )
-      assert.equal( root.firstChild(), child1 )
+      assert.equal( root.childNodes.length, 2 )
+      assert.equal( root.firstChild, child1 )
+    })
+
+    it( 'tree name', () => {
+      const root = Tree( 'Root' )
+
+      assert.strictEqual( root.treeName, 'string-tree' )
     })
   })
 
   describe( 'Plugins', () => {
     describe( 'Serializer', () => {
       it( 'serializes', () => {
-        const tree = Tree( biology )
-        const serialized = tree.serialize()
+        const tree = Tree.deserialize( biology )
+        const serialized = tree.toString()
 
         assert.equal( serialized, expectSerialized )
       })
 
       it( 'deserializes', () => {
-        const tree = Tree( biology )
-        const serialized = tree.serialize()
-        const deserialized = Tree.deserialize( serialized )
-        assert.equal( serialized, deserialized.serialize() )
+        const tree = Tree.deserialize( biology )
+        const serialized = tree.toString()
+        const deserialized = Tree.parse( serialized )
+        assert.equal( serialized, deserialized.toString() )
       })
 
       it( 'deserializes with empty', () => {
-        const deserialized = Tree.deserialize( withEmpty, { retainEmpty: true } )
-        const serialized = deserialized.serialize()
+        const deserialized = Tree.parse( withEmpty, { retainEmpty: true } )
+        const serialized = deserialized.toString()
 
         assert.equal( expectEmpty, serialized )
       })
@@ -121,69 +127,40 @@ describe( 'string-tree', () => {
         const child1 = Tree( 'Child\r1' )
         const child2 = Tree( 'Child\r\n2' )
 
-        root.add( child1 )
-        root.add( child2 )
+        root.appendChild( child1 )
+        root.appendChild( child2 )
 
-        const serialized = root.serialize()
-        const deserialized = Tree.deserialize( serialized )
+        const serialized = root.toString()
+        const deserialized = Tree.parse( serialized )
 
-        assert.equal( serialized, deserialized.serialize() )
+        assert.equal( serialized, deserialized.toString() )
       })
 
       it( 'tabs', () => {
         const serialized = 'Root\n\tChild\n\t\tGrandchild'
-        const root = Tree.deserialize( serialized )
-        const child = root.firstChild()
-        const grandChild = child.firstChild()
+        const root = Tree.parse( serialized )
+        const child = root.firstChild
+        const grandChild = child.firstChild
 
-        assert.equal( root.getValue(), 'Root' )
-        assert.equal( child.getValue(), 'Child' )
-        assert.equal( grandChild.getValue(), 'Grandchild' )
+        assert.equal( root.value, 'Root' )
+        assert.equal( child.value, 'Child' )
+        assert.equal( grandChild.value, 'Grandchild' )
       })
 
       it( 'bad nesting', () => {
-        const bad = '  Chordate\nAnimalia'
-        assert.throws( () => Tree.deserialize( bad ) )
-      } )
+        assert.throws( () => Tree.parse( '  Oh noes' ) )
+      })
 
       it( 'multiple roots', () => {
         const mult = 'Fungi\n\tOomycota\nAnimalia\n\tChordate'
-        assert.throws(() => Tree.deserialize( mult ) )
-        const roots = Tree.deserialize(mult, {deserializeMultiple : true})
+        assert.throws(() => Tree.parse( mult ) )
+
+        const roots = Tree.parse( mult, { deserializeMultiple : true } )
         assert.equal( roots.length, 2 )
       })
 
       it( 'empty file', () => {
-        assert.throws( () => Tree.deserialize( '', { retainEmpty: true } ) )
-      })
-    })
-  })
-
-  describe( 'Factory', () => {
-    const { Factory } = Tree
-
-    describe( 'Options', () => {
-      it( 'exposeState', () => {
-        const Tree = Factory( { exposeState: true } )
-        const root = Tree( 'Root' )
-
-        assert( is.object( root.state ) )
-      })
-    })
-
-    describe( 'Plugins', () => {
-      it( 'plugin array', () => {
-        const plugin = node => {
-          return {
-            lowerCaseValue: () => node.getValue().toLowerCase()
-          }
-        }
-
-        const Tree = Factory( [ plugin ] )
-
-        const root = Tree( 'Root' )
-
-        assert.equal( root.lowerCaseValue(), 'root' )
+        assert.throws( () => Tree.parse( '', { retainEmpty: true } ) )
       })
     })
   })
